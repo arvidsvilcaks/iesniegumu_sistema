@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}iedz{% endblock %}
+{% block title %}{% if kluda %}Kļūda: {% endif %}Mans iesniegums{% endblock %}
+{% block content %}
+<h1>Mans iesniegums</h1>
+
+{% if kluda %}
+<div class="kludu-kopsavilkums" role="alert" id="kludas" tabindex="-1" autofocus>
+  <h2>Iesniegumu nevarēja atrast</h2>
+  <ul><li><a href="#numurs">{{ kluda }}</a></li></ul>
+</div>
+{% endif %}
+
+<p>Ierakstiet iesnieguma numuru, ko saņēmāt pēc iesniegšanas. Pieteikšanās nav vajadzīga.</p>
+
+<section class="karte k-iedz" aria-labelledby="meklet-virsraksts">
+<h2 id="meklet-virsraksts">{{ ikona('search') }} Atrast iesniegumu</h2>
+<form method="get" action="{{ url_for('mans_iesniegums') }}" class="rindas-forma" novalidate>
+  <label for="numurs">Iesnieguma numurs (obligāts)</label>
+  <p class="padoms" id="numurs-padoms">Piemēram, 2026-0001</p>
+  {% if kluda %}<p class="kluda-teksts" id="numurs-kluda">Kļūda: {{ kluda }}</p>{% endif %}
+  <input type="text" id="numurs" name="numurs" value="{{ numurs }}" inputmode="numeric" autocomplete="off"
+         maxlength="20" required aria-describedby="numurs-padoms{% if kluda %} numurs-kluda{% endif %}"{% if kluda %} aria-invalid="true"{% endif %}>
+  <button type="submit">Pārbaudīt statusu</button>
+</form>
+</section>
+
+{% if i %}
+<section aria-labelledby="rezultats-virsraksts" class="karte k-iedz">
+  <h2 id="rezultats-virsraksts">{{ ikona('file-text') }} Iesniegums {{ i.numurs }}</h2>
+  <dl class="dati">
+    <dt>Statuss</dt><dd>{{ statuss(i.statuss) }}</dd>
+    <dt>Tēma</dt><dd>{{ i.tema }}</dd>
+    <dt>Iesniegts</dt><dd>{{ i.izveidots | laiks }}</dd>
+    {% if pedejais %}<dt>Pēdējās izmaiņas</dt><dd>{{ pedejais.laiks | laiks }} — {{ pedejais.teksts }}</dd>{% endif %}
+  </dl>
+  {% if i.statuss in ('Atbildēts', 'Noraidīts') and i.atbilde %}
+  <h3>Pašvaldības atbilde</h3>
+  <blockquote class="teksts">{{ i.atbilde }}</blockquote>
+  {% else %}
+  <p>Atbilde vēl nav sagatavota. Pašvaldība atbild ne vēlāk kā viena mēneša laikā.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

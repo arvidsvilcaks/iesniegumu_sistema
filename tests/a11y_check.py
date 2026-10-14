@@ -4,6 +4,7 @@ Lietošana (lietotnei jābūt startētai: python app.py):
     python tests/a11y_check.py                      # apstaigā saites no sākumlapas (līdz 30 lapām)
     python tests/a11y_check.py /iesniegt /saraksts  # tikai norādītie ceļi
     BASE_URL=http://localhost:5000 python tests/a11y_check.py
+    LOMA=darbinieks python tests/a11y_check.py      # vispirms izvēlas lomu (darbinieks | vaditajs | iedzivotajs)
 
 Rezultāts: izdruka terminālī + a11y-report.md. Izejas kods 1, ja ir critical/serious atradumi.
 Atceries: automātiskie rīki atrod tikai daļu problēmu — tastatūra, ekrānlasītājs un mērogs jāpārbauda ar rokām.
@@ -18,6 +19,7 @@ from axe_playwright_python.sync_playwright import Axe
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000").rstrip("/")
 MAX_PAGES = 30
 AXE_OPTIONS = {"runOnly": {"type": "tag", "values": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"]}}
+LOMA = os.environ.get("LOMA")
 IMPACT_ORDER = {"critical": 0, "serious": 1, "moderate": 2, "minor": 3}
 
 
@@ -47,6 +49,11 @@ def main(paths):
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page(viewport={"width": 1280, "height": 800})
+        if LOMA:
+            page.goto(BASE_URL + "/", wait_until="domcontentloaded")
+            page.check(f"#loma-{LOMA}")
+            page.click("form[action='/loma'] button[type=submit]")
+            lines.append(f"Loma: {LOMA}\n")
         urls = [BASE_URL + ("" if x.startswith("/") else "/") + x for x in paths] if paths else discover(page, BASE_URL + "/")
 
         for url in urls:

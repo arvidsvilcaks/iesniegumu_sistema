@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}visi{% endblock %}
+{% block title %}Piekļūstamības paziņojums{% endblock %}
+{% block content %}
+<h1>Piekļūstamības paziņojums</h1>
+<p class="melnraksts"><strong>Melnraksts.</strong> Sagatavots pēc testēšanas; stājas spēkā, kad to apstiprina atbildīgā persona
+  (lauks «Apstiprināja» zemāk). Veidne: docs/PIEEJAMIBAS-PRASIBAS.md, 5. sadaļa.</p>
+
+<p>{{ KONTAKTI.iestade }} apņemas nodrošināt tīmekļvietnes «Iesniegumi» ({{ request.host_url }}) piekļūstamību saskaņā ar
+  Ministru kabineta 2020. gada 14. jūlija noteikumiem Nr. 445 «Kārtība, kādā iestādes ievieto informāciju internetā».</p>
+
+<h2>Cik piekļūstama ir šī tīmekļvietne?</h2>
+<p>Tīmekļvietne <strong>daļēji atbilst</strong> standarta EN 301 549 (WCAG 2.1 AA) prasībām. Pārbaudījām arī pret WCAG 2.2 AA.
+  Automātiskajā testā un tastatūras, mēroga un ekrāna platuma pārbaudēs neatbilstības nav atrastas. Tomēr izvērtējums
+  vēl nav pabeigts — skat. «Nepiekļūstamais saturs».</p>
+
+<h2>Nepiekļūstamais saturs</h2>
+<ul>
+  <li>Vietne nav pārbaudīta ar ekrānlasītāju (NVDA, VoiceOver), tāpēc tajā var būt neatklātas problēmas — visas lapas —
+    WCAG 1.3.1, 4.1.2, 4.1.3 — iemesls: izvērtējums nav pabeigts — termiņš: [datums].</li>
+  <li>MI palīga atbildes un MI atbilžu projekti ir ģenerēts teksts; to valodas skaidrību iepriekš pārbaudīt nevar —
+    lapas «MI palīgs» un iesnieguma detaļas — WCAG 3.1 (ieteikums, nav AA prasība) — atbildes vienmēr marķētas, un
+    atbildi iedzīvotājam apstiprina darbinieks.</li>
+</ul>
+
+<h2>Piekļūstamības alternatīvas</h2>
+<p>Iesniegumu var iesniegt arī pa tālruni {{ KONTAKTI.talrunis }}, uz e-pastu {{ KONTAKTI.epasts }} vai klātienē klientu centrā
+  ({{ KONTAKTI.adrese }}, {{ KONTAKTI.darba_laiks }}). Darbinieks palīdzēs aizpildīt iesniegumu un pateiks tā numuru.</p>
+
+<h2>Atsauksmēm un saziņai</h2>
+<p>Ja pamanāt piekļūstamības problēmu, rakstiet uz {{ KONTAKTI.epasts }} vai zvaniet {{ KONTAKTI.talrunis }}.
+  Atbildēsim ne vēlāk kā viena mēneša laikā.</p>
+
+<h2>Sūdzību iesniegšana</h2>
+<p>Ja atbilde nav saņemta vai neapmierina, var vērsties pārraugošajā iestādē — Viedās administrācijas un reģionālās
+  attīstības ministrijā (VARAM); tālāk — pie Tiesībsarga.</p>
+
+<h2>Ziņas par paziņojuma sagatavošanu</h2>
+<p>Sagatavots 14.10.2026. Metode:</p>
+<ul>
+  <li>pašnovērtējums pēc kontrolsaraksta (docs/PIEEJAMIBAS-PRASIBAS.md, 3. sadaļa);</li>
+  <li>automātiskais tests (axe-core, WCAG 2.2 AA) visām lapām visās lomās un formām ar kļūdām;</li>
+  <li>automatizēta tastatūras pārbaude, mērķu izmērs, 320 px platums un 200 % mērogs (Playwright, Chromium).</li>
+</ul>
+<p>Manuālā pārbaude ar ekrānlasītāju: [datums, kas veica]. Apstiprināja: [vārds, amats]. Pārskatīts: [datums].</p>
+{% endblock %}

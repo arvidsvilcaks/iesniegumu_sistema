@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}mi{% endblock %}
+{% block title %}{% if kluda %}Kļūda: {% endif %}MI palīgs{% endblock %}
+{% block content %}
+<h1>MI palīgs</h1>
+
+{% if MI_IESLEGTS %}
+<div class="karte k-mi mi-bloks mi-bridinajums">
+  <p class="marks">{{ ikona('bot') }} Jūs sarunājaties ar mākslīgā intelekta (MI) palīgu, nevis ar cilvēku.</p>
+  <p>Palīgs atbild uz vispārīgiem jautājumiem par iesniegumiem. Atbildes ir ģenerētas ar MI un var būt kļūdainas —
+    tās nav juridiska konsultācija un nav pašvaldības lēmums. Neierakstiet personas datus.
+    Lai runātu ar cilvēku, izmantojiet kontaktus lapas kājenē.</p>
+</div>
+{% endif %}
+
+{% if kluda %}
+<div class="kludu-kopsavilkums" role="alert" id="kludas" tabindex="-1" autofocus>
+  <h2>Jautājumu nevarēja nosūtīt</h2>
+  <ul><li><a href="#jautajums">{{ kluda }}</a></li></ul>
+</div>
+{% endif %}
+
+{% if not MI_IESLEGTS %}
+<section aria-labelledby="izslegts-virsraksts" class="karte k-visi">
+  <h2 id="izslegts-virsraksts">{{ ikona('info') }} MI palīgs šobrīd nav pieejams</h2>
+  <p>MI palīgs ir izslēgts. Ar jautājumiem vērsieties pie pašvaldības — kontakti ir lapas kājenē —
+    vai <a href="{{ url_for('iesniegt') }}">iesniedziet iesniegumu</a>.</p>
+</section>
+{% else %}
+<section aria-labelledby="saruna-virsraksts" class="karte k-mi">
+  <h2 id="saruna-virsraksts">{{ ikona('message-circle') }} Saruna</h2>
+  <div class="cats" role="log" aria-live="polite" aria-labelledby="saruna-virsraksts">
+    {% if cats %}
+    <ol class="cata-ieraksti">
+      {% for z in cats %}
+      {% if z.kas == 'mi' %}
+      <li class="cata-mi" data-mi-generets="true" data-mi-avots="{{ z.avots }}"{% if loop.last %} id="pedeja-atbilde" tabindex="-1"{% endif %}>
+        <p class="cata-kas">{{ ikona('bot') }} MI palīgs <span class="marks-iekava">(ģenerēts ar MI – pārbaudiet pirms lietošanas; avots: {{ z.avots }})</span>:</p>
+        <p class="teksts">{{ z.teksts }}</p>
+      </li>
+      {% else %}
+      <li class="cata-lietotajs">
+        <p class="cata-kas">{{ ikona('user-round') }} Jūs:</p>
+        <p class="teksts">{{ z.teksts }}</p>
+      </li>
+      {% endif %}
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p>Saruna vēl nav sākta. Piemēram, jautājiet: «Kā iesniegt iesniegumu?» vai «Cik ilgi jāgaida atbilde?»</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="karte k-mi" aria-labelledby="jautat-virsraksts">
+<h2 id="jautat-virsraksts">{{ ikona('send') }} Uzdot jautājumu</h2>
+<form method="post" action="{{ url_for('palidzigs') }}">
+  <label for="jautajums">Jūsu jautājums</label>
+  {% if kluda %}<p class="kluda-teksts" id="jautajums-kluda">Kļūda: {{ kluda }}</p>{% endif %}
+  <textarea id="jautajums" name="jautajums" rows="3" maxlength="500"{% if kluda %} aria-describedby="jautajums-kluda" aria-invalid="true"{% endif %}>{{ jautajums }}</textarea>
+  <div class="pogas">
+    <button type="submit">{{ ikona('send') }} Sūtīt jautājumu</button>
+    {% if cats %}<button type="submit" name="darbiba" value="notirit" class="secondary">Notīrīt sarunu</button>{% endif %}
+  </div>
+</form>
+</section>
+{% endif %}
+{% endblock %}

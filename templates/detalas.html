@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}darb{% endblock %}
+{% block title %}{% if kludas %}Kļūda: {% endif %}Iesniegums {{ i.numurs }}{% endblock %}
+{% block content %}
+<p class="atpakal"><a href="{{ url_for('saraksts') }}">{{ ikona('arrow-left') }} Atpakaļ uz iesniegumu sarakstu</a></p>
+<h1>Iesniegums {{ i.numurs }} {{ statuss(i.statuss) }}</h1>
+
+{% if kludas %}
+<div class="kludu-kopsavilkums" role="alert" id="kludas" tabindex="-1" autofocus>
+  <h2>Darbību nevarēja izpildīt</h2>
+  <ul>
+    {% for lauks, teksts in kludas.items() %}<li><a href="#{{ lauks }}">{{ teksts }}</a></li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% macro kluda(lauks) -%}
+  {% if kludas.get(lauks) %}<p class="kluda-teksts" id="{{ lauks }}-kluda">Kļūda: {{ kludas[lauks] }}</p>{% endif %}
+{%- endmacro %}
+{% macro aria(lauks) -%}
+  {%- if kludas.get(lauks) %} aria-describedby="{{ lauks }}-kluda" aria-invalid="true"{% endif %}
+{%- endmacro %}
+
+<div class="detalu-rezgis">
+<div class="detalu-kolonna">
+<section aria-labelledby="dati-virsraksts" class="karte k-darb">
+  <h2 id="dati-virsraksts">{{ ikona('file-text') }} Iesnieguma dati</h2>
+  <dl class="dati">
+    <dt>Statuss</dt><dd>{{ statuss(i.statuss) }}</dd>
+    <dt>Tēma</dt><dd>{{ i.tema }}</dd>
+    <dt>Iesniegts</dt><dd>{{ i.izveidots | laiks }}</dd>
+    <dt>Iesniedzējs</dt><dd>{{ i.vards }}</dd>
+    <dt>E-pasts</dt><dd>{{ i.epasts }}</dd>
+    <dt>Adrese vai vieta</dt><dd>{{ i.adrese or 'Nav norādīta' }}</dd>
+    <dt>Apraksts</dt><dd class="teksts">{{ i.apraksts }}</dd>
+  </dl>
+</section>
+
+<section aria-labelledby="mi-virsraksts" class="karte k-mi mi-bloks">
+  <h2 id="mi-virsraksts" tabindex="-1">{{ ikona('sparkles') }} MI ieteikums</h2>
+  {% if not MI_IESLEGTS %}
+  <p>MI ieteikumi šobrīd ir izslēgti (iestatījums <code>MI_IZSLEGTS</code>). Atbildi sagatavojiet bez MI.</p>
+  {% else %}
+  <p>MI var ieteikt tēmu un sagatavot atbildes projektu. MI nekad neko nesaglabā un nenosūta — atbildi pārbaudāt un saglabājat jūs.
+    MI tēmu ieteikums nekad nemaina to, vai un kā iesniegums tiek izskatīts.</p>
+  {% if mi %}
+  <p class="marks">{{ ikona('info') }} Ģenerēts ar MI – pārbaudiet pirms lietošanas</p>
+  <dl class="dati" data-mi-generets="true" data-mi-avots="{{ mi.avots }}">
+    <dt>Avots</dt><dd>{{ mi.avots }}</dd>
+    <dt>Ieteiktā tēma</dt><dd>{{ mi.tema }}{% if mi.tema != i.tema %} (pašreizējā tēma: {{ i.tema }}){% else %} (sakrīt ar pašreizējo){% endif %}</dd>
+    <dt>Atbildes projekts</dt><dd><blockquote class="teksts mi-projekts">{{ mi.atbildes_projekts }}</blockquote></dd>
+  </dl>
+  <form method="post" action="{{ url_for('mi_izmantot', numurs=i.numurs) }}">
+    <button type="submit">Izmantot projektu</button>
+  </form>
+  {% endif %}
+  <form method="post" action="{{ url_for('mi_ieteikums', numurs=i.numurs) }}">
+    <button type="submit" class="secondary">{% if mi %}Saņemt jaunu MI ieteikumu{% else %}Saņemt MI ieteikumu{% endif %}</button>
+  </form>
+  {% endif %}
+</section>
+
+<section aria-labelledby="statuss-virsraksts" class="karte k-darb">
+  <h2 id="statuss-virsraksts">{{ ikona('briefcase') }} Statusa maiņa</h2>
+  {% if parejas %}
+  <form method="post" action="{{ url_for('mainit_statusu', numurs=i.numurs) }}">
+    <fieldset id="statuss" tabindex="-1"{% if kludas.statuss %} aria-describedby="statuss-kluda"{% endif %}>
+      <legend>Jaunais statuss (pašreizējais: {{ i.statuss }})</legend>
+      {{ kluda('statuss') }}
+      {% for s in parejas %}
+      <div class="radio">
+        <input type="radio" id="statuss-{{ STATUSA_KLASE[s] }}" name="statuss" value="{{ s }}"{% if loop.length == 1 %} checked{% endif %}>
+        <label for="statuss-{{ STATUSA_KLASE[s] }}">{{ s }}</label>
+      </div>
+      {% endfor %}
+    </fieldset>
+    <button type="submit">Mainīt statusu</button>
+  </form>
+  {% else %}
+  <p>Iesniegums ir slēgts ar statusu «{{ i.statuss }}». Statusu vairs nevar mainīt.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="atbilde-virsraksts" class="karte k-darb">
+  <h2 id="atbilde-virsraksts">{{ ikona('mail') }} Atbilde iedzīvotājam</h2>
+  <form method="post" action="{{ url_for('saglabat_atbildi', numurs=i.numurs) }}" novalidate>
+    <label for="atbilde">Atbildes teksts</label>
+    {% if ir_melnraksts %}<p class="marks" id="atbilde-mi">{{ ikona('info') }} Laukā ir MI ģenerēts projekts. Ģenerēts ar MI – pārbaudiet pirms lietošanas.
+      Tas vēl nav saglabāts. Aizstājiet visas vietas kvadrātiekavās, piemēram, [termiņš], ar faktiem.</p>{% endif %}
+    {{ kluda('atbilde') }}
+    {% set apraksti = (['atbilde-mi'] if ir_melnraksts else []) + (['atbilde-kluda'] if kludas.atbilde else []) %}
+    <textarea id="atbilde" name="atbilde" rows="8" maxlength="5000"
+      {%- if apraksti %} aria-describedby="{{ apraksti | join(' ') }}"{% endif %}
+      {%- if kludas.atbilde %} aria-invalid="true"{% endif %}
+      {%- if ir_melnraksts %} data-mi-generets="true"{% endif %}>{{ ievade.atbilde or i.atbilde or '' }}</textarea>
+    {% if ir_melnraksts %}
+    <div class="izvele">
+      {{ kluda('mi_parbaudits') }}
+      <div class="radio">
+        <input type="checkbox" id="mi_parbaudits" name="mi_parbaudits" value="ja" required{{ aria('mi_parbaudits') }}>
+        <label for="mi_parbaudits">Apliecinu: MI projekts ir izlasīts, pārbaudīts pret iesniegumu un vajadzības gadījumā rediģēts (obligāts)</label>
+      </div>
+    </div>
+    {% endif %}
+    <button type="submit">Saglabāt atbildi</button>
+  </form>
+</section>
+
+<section aria-labelledby="komentars-virsraksts" class="karte k-darb">
+  <h2 id="komentars-virsraksts">{{ ikona('message-circle') }} Iekšējais komentārs</h2>
+  <form method="post" action="{{ url_for('pievienot_komentaru', numurs=i.numurs) }}">
+    <label for="komentars">Komentārs (redzams tikai darbiniekiem)</label>
+    {{ kluda('komentars') }}
+    <textarea id="komentars" name="komentars" rows="3" maxlength="2000"{{ aria('komentars') }}>{{ ievade.komentars or '' }}</textarea>
+    <button type="submit">Pievienot komentāru</button>
+  </form>
+</section>
+
+</div>
+<div class="detalu-kolonna">
+<section aria-labelledby="vesture-virsraksts" class="karte k-visi">
+  <h2 id="vesture-virsraksts">{{ ikona('clock') }} Vēsture</h2>
+  <ol class="vesture">
+    {% for n in notikumi %}
+    <li class="vesture-{{ n.veids }}">
+      <p class="vesture-meta"><time datetime="{{ n.laiks | replace(' ', 'T') }}">{{ n.laiks | laiks }}</time>
+        · {{ NOTIKUMA_VEIDI.get(n.veids, n.veids) }} · {{ VISAS_LOMAS.get(n.loma, n.loma or 'nezināms') }}</p>
+      <p class="teksts">{{ n.teksts }}</p>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+</div>
+</div>
+{% endblock %}

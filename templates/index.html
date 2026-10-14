@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block title %}Sākums{% endblock %}
+{% block content %}
+{% set LOMU_INFO = {
+  'iedzivotajs': ('I', 'Iesniedz iesniegumu un seko tā statusam', ['Iesniegt iesniegumu', 'Apstiprinājums ar numuru', 'Mans iesniegums']),
+  'darbinieks': ('D', 'Apstrādā iesniegumus un sagatavo atbildes', ['Iesniegumu saraksts ar filtriem', 'Detaļas, statuss, vēsture', 'MI ieteikums']),
+  'vaditajs': ('V', 'Redz pārskatu par iesniegumiem', ['Skaits pa statusiem un tēmām', 'Joslu diagramma', 'Vidējais apstrādes laiks']),
+} %}
+{% set TEMU_IKONAS = {'Ielas un ceļi': 'construction', 'Apgaismojums': 'lightbulb', 'Atkritumi un vide': 'trash-2',
+                      'Bērnudārza rinda': 'baby', 'Sociālā palīdzība': 'heart-handshake', 'Cits': 'circle-help'} %}
+
+<section class="hero" aria-labelledby="hero-virsraksts">
+  <div class="hero-teksts">
+    <p class="uzraksts">Novada pašvaldības e-pakalpojums</p>
+    <h1 id="hero-virsraksts">Iesniegumi novada pašvaldībai</h1>
+    <p class="ievads">Iesniedziet iesniegumu par ielām, apgaismojumu, atkritumiem vai citiem jautājumiem un sekojiet tā statusam.</p>
+    <p class="hero-darbibas">
+      <a class="button" href="{{ url_for('iesniegt') }}">{{ ikona('send') }} Iesniegt iesniegumu</a>
+      <a class="button secondary" href="{{ url_for('mans_iesniegums') }}">{{ ikona('search') }} Pārbaudīt statusu</a>
+    </p>
+  </div>
+  <div class="plusma">
+    <h2 class="plusma-virsraksts">Kā tiek izskatīts iesniegums</h2>
+    <ol class="plusma-soli">
+      <li>{{ ikona('send') }}<span><strong>Iesniedzat</strong> un saņemat numuru</span></li>
+      <li>{{ ikona('inbox') }}<span>{{ statuss('Jauns') }} reģistrēts</span></li>
+      <li>{{ ikona('briefcase') }}<span>{{ statuss('Apstrādē') }} darbinieks izskata</span></li>
+      <li>{{ ikona('mail') }}<span>{{ statuss('Atbildēts') }} vai {{ statuss('Noraidīts') }} ar atbildi</span></li>
+    </ol>
+  </div>
+</section>
+
+<section aria-labelledby="loma-virsraksts" class="karte k-visi">
+  <h2 id="loma-virsraksts">{{ ikona('user-round') }} Izvēlieties lomu</h2>
+  <form method="post" action="{{ url_for('izveleties_lomu') }}">
+    <fieldset class="bez-ramja">
+      <legend>Kā vēlaties lietot sistēmu? (mācību režīms, bez pieteikšanās)</legend>
+      <div class="lomu-kartes">
+        {% for kods, nosaukums in LOMAS.items() %}
+        {% set burts, apraksts, ekrani = LOMU_INFO[kods] %}
+        <div class="loma-karte loma-{{ kods }}">
+          <input type="radio" id="loma-{{ kods }}" name="loma" value="{{ kods }}" {% if loma == kods %}checked{% endif %}>
+          <label for="loma-{{ kods }}">
+            <span class="loma-burts" aria-hidden="true">{{ burts }}</span>
+            <span class="loma-nos">{{ nosaukums }}</span>
+            <span class="loma-apr">{{ apraksts }}</span>
+          </label>
+          <ul class="loma-ekrani">
+            {% for e in ekrani %}<li>{{ e }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <button type="submit">Turpināt {{ ikona('arrow-right') }}</button>
+  </form>
+</section>
+
+<section aria-labelledby="temas-virsraksts" class="karte k-visi">
+  <h2 id="temas-virsraksts">{{ ikona('file-text') }} Iesniegumu tēmas</h2>
+  <ul class="temas-cipi">
+    {% for t in temas %}<li>{{ ikona(TEMU_IKONAS.get(t.nosaukums, 'circle-help')) }} {{ t.nosaukums }}</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

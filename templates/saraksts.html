@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}darb{% endblock %}
+{% block title %}Iesniegumu saraksts{% endblock %}
+{% block content %}
+<h1>Iesniegumu saraksts</h1>
+
+<form method="get" action="{{ url_for('saraksts') }}" class="filtri karte k-darb">
+  <fieldset class="bez-ramja">
+    <legend>{{ ikona('search') }} Filtrēt iesniegumus</legend>
+    <div class="filtru-lauki">
+      <div>
+        <label for="f-statuss">Statuss</label>
+        <select id="f-statuss" name="statuss">
+          <option value="">Visi statusi</option>
+          {% for s in statusi %}<option value="{{ s }}"{% if filtri.statuss == s %} selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="f-tema">Tēma</label>
+        <select id="f-tema" name="tema">
+          <option value="">Visas tēmas</option>
+          {% for t in temas %}<option value="{{ t.id }}"{% if filtri.tema == t.id|string %} selected{% endif %}>{{ t.nosaukums }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="f-q">Meklēt tekstā</label>
+        <p class="padoms" id="f-q-padoms">Numurs, iesniedzējs, adrese vai apraksts</p>
+        <input type="search" id="f-q" name="q" value="{{ filtri.q }}" aria-describedby="f-q-padoms">
+      </div>
+    </div>
+    <div class="pogas">
+      <button type="submit">Rādīt iesniegumus</button>
+      {% if ir_filtri %}<a href="{{ url_for('saraksts') }}">Notīrīt filtrus</a>{% endif %}
+    </div>
+  </fieldset>
+</form>
+
+<div class="tabulas-ietvars" role="region" aria-labelledby="saraksts-nosaukums" tabindex="0">
+  <table>
+    <caption id="saraksts-nosaukums">
+      Iesniegumi{% if ir_filtri %} (filtrēti){% endif %} — atrasti {{ iesniegumi | length }}
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Numurs</th>
+        <th scope="col">Datums</th>
+        <th scope="col">Tēma</th>
+        <th scope="col">Iesniedzējs</th>
+        <th scope="col">Statuss</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in iesniegumi %}
+      <tr>
+        <th scope="row"><a href="{{ url_for('detalas', numurs=i.numurs) }}">Iesniegums {{ i.numurs }}</a></th>
+        <td>{{ i.izveidots | datums }}</td>
+        <td>{{ i.tema }}</td>
+        <td>{{ i.vards }}</td>
+        <td>{{ statuss(i.statuss) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">Neviens iesniegums neatbilst filtriem.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

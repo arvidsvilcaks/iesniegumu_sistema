@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Sākums{% endblock %} – Iesniegumi</title>
+  <link rel="preload" href="{{ url_for('static', filename='fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+{% from "_makro.html" import ikona with context %}
+<body class="tema-{% block tema %}visi{% endblock %}">
+  <a class="skip-link" href="#saturs">Pāriet uz saturu</a>
+
+  {% macro nav_saite(endpoint, teksts, ik) -%}
+    <li><a href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} aria-current="page"{% endif %}>{{ ikona(ik) }}<span>{{ teksts }}</span></a></li>
+  {%- endmacro %}
+
+  <header class="site-header">
+    <div class="virsjosla" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <div class="ietvars galvene">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-zime">{{ ikona('landmark') }}</span>
+        <span class="brand-teksts">
+          <span class="brand-iestade">Novada pašvaldība</span>
+          <span class="brand-nos">Iesniegumi</span>
+        </span>
+      </a>
+      <nav aria-label="Galvenā izvēlne">
+        <ul>
+          {{ nav_saite('index', 'Sākums', 'house') }}
+          {{ nav_saite('iesniegt', 'Iesniegt iesniegumu', 'send') }}
+          {{ nav_saite('mans_iesniegums', 'Mans iesniegums', 'search') }}
+          {% if loma == 'darbinieks' %}{{ nav_saite('saraksts', 'Iesniegumu saraksts', 'list') }}{% endif %}
+          {% if loma == 'vaditajs' %}{{ nav_saite('parskats', 'Pārskats', 'chart-column') }}{% endif %}
+          {{ nav_saite('palidzigs', 'MI palīgs', 'bot') }}
+        </ul>
+      </nav>
+      <p class="loma-josla">
+        {% if lomas_nosaukums %}
+          <span class="loma-cips loma-{{ loma }}"><span class="loma-burts" aria-hidden="true">{{ lomas_nosaukums[0] }}</span>Loma: <strong>{{ lomas_nosaukums }}</strong></span>
+          <a href="{{ url_for('index') }}#loma-virsraksts">Mainīt lomu</a>
+        {% else %}<a href="{{ url_for('index') }}#loma-virsraksts">{{ ikona('user-round') }} Izvēlēties lomu</a>{% endif %}
+      </p>
+    </div>
+  </header>
+
+  <main id="saturs" tabindex="-1">
+    {% with zinas = get_flashed_messages(with_categories=true) %}
+      {% for kategorija, zina in zinas %}
+        {% if kategorija == 'kluda' %}
+          <div class="kludu-kopsavilkums" role="alert"{% if loop.first %} id="pazinojums" tabindex="-1"{% endif %}>{{ ikona('triangle-alert') }} {{ zina }}</div>
+        {% else %}
+          <p class="pazinojums" role="status"{% if loop.first %} id="pazinojums" tabindex="-1"{% endif %}>{{ ikona('circle-check') }} {{ zina }}</p>
+        {% endif %}
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="ietvars kajene">
+      <div>
+        <h2 class="kajene-virsraksts">Kontakti un palīdzība</h2>
+        <address class="kontakti">
+          <span>{{ ikona('map-pin') }} {{ KONTAKTI.iestade }}, klientu centrs: {{ KONTAKTI.adrese }} ({{ KONTAKTI.darba_laiks }})</span>
+          <span>{{ ikona('phone') }} Tālrunis: <a href="tel:{{ KONTAKTI.talrunis | replace(' ', '') }}">{{ KONTAKTI.talrunis }}</a></span>
+          <span>{{ ikona('mail') }} E-pasts: <a href="mailto:{{ KONTAKTI.epasts }}">{{ KONTAKTI.epasts }}</a></span>
+        </address>
+      </div>
+      <div class="kajene-saites">
+        <p><a href="{{ url_for('pieklustamiba') }}">{{ ikona('accessibility') }} Piekļūstamības paziņojums</a></p>
+        <p class="kajene-piezime">Mācību prototips · kontaktinformācija ir izdomāta</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}visi{% endblock %}
+{% block title %}Lapa nav atrasta{% endblock %}
+{% block content %}
+<h1>Lapa nav atrasta</h1>
+<p>Pārbaudiet adresi vai iesnieguma numuru.</p>
+<p><a href="{{ url_for('index') }}">Atgriezties sākumlapā</a></p>
+{% endblock %}

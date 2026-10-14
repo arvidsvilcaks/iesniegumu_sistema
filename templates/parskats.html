@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}vad{% endblock %}
+{% block title %}Pārskats{% endblock %}
+{% block content %}
+<h1>Pārskats vadītājam</h1>
+
+<section aria-labelledby="laiks-virsraksts">
+  <h2 id="laiks-virsraksts" class="sadalas-virsraksts">Kopsavilkums</h2>
+  <ul class="raditaji">
+    <li class="r-visi">{{ ikona('inbox', 'raditajs-ikona') }}<span class="raditajs-vert">{{ kopa.visi }}</span> iesniegumi kopā</li>
+    <li class="r-pabeigti">{{ ikona('circle-check', 'raditajs-ikona') }}<span class="raditajs-vert">{{ kopa.pabeigti }}</span> pabeigti («Atbildēts» vai «Noraidīts»)</li>
+    <li class="r-laiks">{{ ikona('clock', 'raditajs-ikona') }}<span class="raditajs-vert">{{ kopa.vid_dienas | dienas }}</span> vidējais apstrādes laiks pabeigtajiem</li>
+  </ul>
+  <p class="padoms">Apstrādes laiks = no iesniegšanas līdz statusam «Atbildēts» vai «Noraidīts».</p>
+</section>
+
+<div class="parskata-rezgis">
+<section aria-labelledby="statusi-virsraksts" class="karte k-vad">
+  <h2 id="statusi-virsraksts">{{ ikona('list') }} Iesniegumi pa statusiem</h2>
+  <div class="tabulas-ietvars">
+    <table>
+      <caption>Iesniegumu skaits pa statusiem</caption>
+      <thead><tr><th scope="col">Statuss</th><th scope="col" class="skaitlis">Skaits</th></tr></thead>
+      <tbody>
+        {% for r in pa_statusiem %}
+        <tr>
+          <th scope="row">{{ statuss(r.statuss) }}</th>
+          <td class="skaitlis">{{ r.skaits }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="temas-virsraksts" class="karte k-vad">
+  <h2 id="temas-virsraksts">{{ ikona('chart-column') }} Iesniegumi pa tēmām</h2>
+
+  <figure class="diagramma">
+    <figcaption>Joslu diagramma: iesniegumu skaits pa tēmām. Tie paši dati ir tabulā zemāk.</figcaption>
+    <ul class="joslas">
+      {% for r in pa_temam %}
+      <li>
+        <span class="josla-nosaukums">{{ r.nosaukums }}</span>
+        <span class="josla-sliede"><span class="josla" style="width: {{ (r.skaits / lielakais * 100) | round(1) }}%"></span></span>
+        <span class="josla-vertiba">{{ r.skaits }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </figure>
+
+  <div class="tabulas-ietvars">
+    <table>
+      <caption>Iesniegumu skaits un vidējais apstrādes laiks pa tēmām</caption>
+      <thead>
+        <tr>
+          <th scope="col">Tēma</th>
+          <th scope="col" class="skaitlis">Skaits</th>
+          <th scope="col" class="skaitlis">Vidējais apstrādes laiks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in pa_temam %}
+        <tr>
+          <th scope="row">{{ r.nosaukums }}</th>
+          <td class="skaitlis">{{ r.skaits }}</td>
+          <td class="skaitlis">{{ r.vid_dienas | dienas }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+</div>
+
+<section aria-labelledby="mi-uzraudziba-virsraksts" class="karte k-mi">
+  <h2 id="mi-uzraudziba-virsraksts">{{ ikona('shield-check') }} MI ieteikumu uzraudzība (pēdējās 30 dienas)</h2>
+  <p>Kvalitātes izlases pārbaude reizi mēnesī (MI akts, docs/MI-RISKA-KLASIFIKACIJA.md): pārskatiet, vai uz MI projektiem balstītās
+    atbildes ir pareizas un vai MI ieteiktā tēma sakrīt ar faktisko. MI {% if MI_IESLEGTS %}ir <strong>ieslēgts</strong>{% else %}ir <strong>izslēgts</strong>{% endif %}
+    (izslēgšana: vides mainīgais <code>MI_IZSLEGTS=1</code>).</p>
+  <ul class="raditaji">
+    <li class="r-visi">{{ ikona('sparkles', 'raditajs-ikona') }}<span class="raditajs-vert">{{ mi_kopa.ieteikumi or 0 }}</span> MI ieteikumi saņemti</li>
+    <li class="r-pabeigti">{{ ikona('check', 'raditajs-ikona') }}<span class="raditajs-vert">{{ mi_kopa.apstiprinati or 0 }}</span> atbildes balstītas uz MI projektu (no tām rediģētas: {{ mi_kopa.redigeti or 0 }})</li>
+    <li class="r-laiks">{{ ikona('triangle-alert', 'raditajs-ikona') }}<span class="raditajs-vert">{{ mi_kopa.tema_atskiras or 0 }}</span> ieteikumi ar tēmu, kas atšķiras no faktiskās</li>
+  </ul>
+  <div class="tabulas-ietvars" role="region" aria-labelledby="mi-izlase-nosaukums" tabindex="0">
+    <table>
+      <caption id="mi-izlase-nosaukums">Izlase pārbaudei: atbildes, kas balstītas uz MI projektu</caption>
+      <thead>
+        <tr>
+          <th scope="col">Iesniegums</th>
+          <th scope="col">Saglabāts</th>
+          <th scope="col">MI ieteiktā tēma</th>
+          <th scope="col">Faktiskā tēma</th>
+          <th scope="col">Darbinieks rediģēja</th>
+          <th scope="col">Atbilde (sākums)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in mi_izlase %}
+        <tr>
+          <th scope="row">{{ r.numurs }}</th>
+          <td>{{ r.laiks | laiks }}</td>
+          <td>{{ r.ieteikta_tema or '—' }}</td>
+          <td>{{ r.tema }}{% if r.ieteikta_tema and r.ieteikta_tema != r.tema %} <strong>(atšķiras)</strong>{% endif %}</td>
+          <td>{{ 'Jā' if r.redigets else 'Nē' }}</td>
+          <td>{{ (r.atbilde or '') | truncate(140) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">Pēdējās 30 dienās nav atbilžu, kas balstītas uz MI projektu.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

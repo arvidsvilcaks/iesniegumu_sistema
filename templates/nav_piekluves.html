@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}visi{% endblock %}
+{% block title %}Nav piekļuves{% endblock %}
+{% block content %}
+<h1>Nav piekļuves</h1>
+<p>Šī lapa ir pieejama tikai lomai: {{ vajadzigas | join(', ') }}.
+  {% if lomas_nosaukums %}Jūsu pašreizējā loma ir «{{ lomas_nosaukums }}».{% endif %}</p>
+<p><a href="{{ url_for('index') }}#loma-virsraksts">Izvēlēties citu lomu sākumlapā</a></p>
+{% endblock %}

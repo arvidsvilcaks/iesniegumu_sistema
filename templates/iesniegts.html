@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_makro.html" import ikona, statuss with context %}
+{% block tema %}iedz{% endblock %}
+{% block title %}Iesniegums reģistrēts{% endblock %}
+{% block content %}
+<h1>Iesniegums reģistrēts</h1>
+
+<div class="apstiprinajums">
+  <span class="apstiprinajums-zime">{{ ikona('circle-check') }}</span>
+  <div>
+  <p>Jūsu iesnieguma numurs:</p>
+  <p class="numurs">{{ iesniegums.numurs }}</p>
+  <p>Tēma: {{ iesniegums.tema }}. Reģistrēts {{ iesniegums.izveidots | laiks }}.</p>
+  </div>
+</div>
+
+<p>Saglabājiet iesnieguma numuru — ar to varat <a href="{{ url_for('mans_iesniegums', numurs=iesniegums.numurs) }}">pārbaudīt iesnieguma {{ iesniegums.numurs }} statusu</a>.</p>
+
+<section class="karte k-iedz" aria-labelledby="talak-virsraksts">
+<h2 id="talak-virsraksts">{{ ikona('clock') }} Kas notiks tālāk</h2>
+<ol class="soli">
+  <li>Pašvaldības darbinieks izskatīs iesniegumu, un tā statuss mainīsies no «Jauns» uz «Apstrādē».</li>
+  <li>Atbildi sagatavosim ne vēlāk kā viena mēneša laikā.</li>
+  <li>Atbildi nosūtīsim uz jūsu norādīto e-pasta adresi.</li>
+</ol>
+</section>
+
+<p><a href="{{ url_for('iesniegt') }}">Iesniegt vēl vienu iesniegumu</a></p>
+{% endblock %}

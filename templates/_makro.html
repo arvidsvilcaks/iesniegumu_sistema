@@ -1,0 +1,8 @@
+{# Dekoratīva ikona no static/ikonas.svg (Lucide). Vienmēr aria-hidden — nozīmi nes blakus teksts. #}
+{% macro ikona(nosaukums, klase='') -%}
+<svg class="ikona {{ klase }}" aria-hidden="true" focusable="false"><use href="{{ url_for('static', filename='ikonas.svg') }}#{{ nosaukums }}"></use></svg>
+{%- endmacro %}
+
+{% macro statuss(s) -%}
+<span class="statuss statuss-{{ STATUSA_KLASE[s] }}">{{ s }}</span>
+{%- endmacro %}
